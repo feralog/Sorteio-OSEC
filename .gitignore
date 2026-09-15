@@ -1,0 +1,8 @@
+# planilha de origem — os nomes já estão em assets/dados.js
+Pasta1.xlsx
+*.xlsx
+
+# lixo do Windows
+Thumbs.db
+desktop.ini
+.DS_Store

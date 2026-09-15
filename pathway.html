@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pathway &middot; Sorteio OSEC</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/estilo.css">
+</head>
+<body style="--accent:#a78bfa">
+<div class="wrap">
+
+  <nav class="topo">
+    <a class="voltar" href="index.html">&#8592; Todas as categorias</a>
+    <span class="marca">Sorteio OSEC</span>
+  </nav>
+
+  <header class="hero">
+    <div class="icone">🎓</div>
+    <p class="olho">Categoria</p>
+    <h1>Pathway</h1>
+    <p class="sub">14 participantes concorrendo. A roleta gira para cima mostrando três nomes por vez &mdash; quem parar na faixa do meio é o sorteado.</p>
+    <div class="premios">
+      <h2>Prêmios desta categoria</h2>
+      <ul>
+        <li>2 bolsas 100% do curso Pathway</li>
+      </ul>
+    </div>
+
+  </header>
+
+  <section class="palco">
+    <canvas id="confete" aria-hidden="true"></canvas>
+
+    <div class="roleta" id="roleta" role="img">
+      <div class="veu topo-v"></div>
+      <div class="faixa" id="faixa"></div>
+      <div class="marcador"></div>
+      <div class="veu base-v"></div>
+    </div>
+
+    <div class="acoes">
+      <button class="btn" id="sortear">Sortear</button>
+      <button class="btn fantasma" id="som" type="button">Som</button>
+      <button class="btn fantasma" id="limpar" type="button">Limpar resultados</button>
+      <p class="dica" id="aviso"></p>
+    </div>
+
+    <label class="opcao">
+      <input type="checkbox" id="excluir" checked>
+      Não repetir quem já foi sorteado nesta categoria
+    </label>
+
+    <div class="vencedor" id="vencedor" hidden aria-live="polite"></div>
+  </section>
+
+  <div class="grade">
+    <section class="painel">
+      <h2>Participantes <span class="conta" id="conta-part"></span></h2>
+      <ul class="lista" id="participantes"></ul>
+    </section>
+    <section class="painel">
+      <h2>Sorteados <span class="conta" id="conta-ganha">0</span></h2>
+      <ul class="lista" id="ganhadores"></ul>
+    </section>
+  </div>
+
+</div>
+
+<script src="assets/dados.js"></script>
+<script src="assets/sorteio.js"></script>
+<script>iniciarSorteio("pathway");</script>
+</body>
+</html>
