@@ -24,6 +24,7 @@ e quem para na faixa do meio é o sorteado.
   parar, com duração sorteada entre 5,2 s e 6,1 s a cada rodada.
 - Cada categoria guarda no navegador (`localStorage`) quem já saiu. A opção
   *"não repetir"* vem ligada — útil para categorias com mais de um prêmio.
+- A lista de participantes é editável em lote na própria página (veja abaixo).
 - Atalho: <kbd>Espaço</kbd> sorteia.
 
 ## Estrutura
@@ -39,6 +40,23 @@ assets/estilo.css          estilo compartilhado
 Site estático puro — sem dependências externas, sem build. Basta abrir o `index.html`.
 
 ## Atualizar a lista de nomes
+
+### Na hora, pelo site (edição em lote)
+
+Na página da categoria, no painel **Participantes**, clique em **Editar lista**: a caixa
+com os nomes vira um campo de texto com um nome por linha, já todo selecionado. É só
+<kbd>Ctrl</kbd>+<kbd>A</kbd> e colar a lista nova por cima, depois **Salvar lista**
+(<kbd>Ctrl</kbd>+<kbd>Enter</kbd> também salva, <kbd>Esc</kbd> fecha).
+
+- Linhas vazias, espaços sobrando, marcadores (`-`, `1.`) e nomes repetidos são descartados.
+- Também aceita nomes separados por `;` ou por vírgula quando vêm tudo numa linha só.
+- A lista editada fica **só naquele navegador** (`localStorage`), por categoria, e vale para
+  o sorteio, para as contagens e para a página inicial. **Restaurar original** volta para o
+  que está em `dados.js`.
+- Os resultados já sorteados continuam salvos; quem saiu mas não está mais na lista aparece
+  marcado como *fora da lista* no painel **Sorteados**.
+
+### De forma permanente, no código
 
 Edite `assets/dados.js`. Cada categoria tem `slug`, `nome`, `icone`, `cor`, `premios[]` e
 `nomes[]`. Para acrescentar uma categoria nova, copie um dos arquivos `<categoria>.html`,
