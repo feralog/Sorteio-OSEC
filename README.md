@@ -9,11 +9,11 @@ e quem para na faixa do meio é o sorteado.
 
 | Categoria | Participantes |
 |---|---|
-| Jalecos Conforto | 22 |
-| Pathway | 14 |
-| Geny Jalecos | 12 |
-| Acesso Total | 8 |
-| Caixa de Brigadeiro | 11 |
+| Jalecos Conforto | 23 |
+| Pathway | 15 |
+| Geny Jalecos | 13 |
+| Acesso Total | 9 |
+| Caixa de Brigadeiro | 12 |
 
 ## Como funciona
 

@@ -28,7 +28,8 @@ window.CATEGORIAS = [
       "Antonio Torquato",
       "Sophia Valquiria Ramos Maita",
       "Vinicius Taiky Miura de Oliveira",
-      "Gabriel Ferraz Moretto"
+      "Gabriel Ferraz Moretto",
+      "Enzo Borgo"
     ]
   },
   {
@@ -53,7 +54,8 @@ window.CATEGORIAS = [
       "Fernanda Candeo Paulino",
       "Gabriela Mendes Nobrega",
       "Igor Bombana Liatzkowski",
-      "Roberta Costa Petinati"
+      "Roberta Costa Petinati",
+      "Enzo Borgo"
     ]
   },
   {
@@ -74,7 +76,8 @@ window.CATEGORIAS = [
       "Heloísa Leão Silva",
       "Vinicius Taiky Miura de Oliveira",
       "Gabriela Mendes Nobrega",
-      "Luiza Krunfli Silva"
+      "Luiza Krunfli Silva",
+      "Enzo Borgo"
     ]
   },
   {
@@ -95,7 +98,8 @@ window.CATEGORIAS = [
       "Roberta Costa Petinati",
       "Antonio Torquato",
       "Sophia Valquiria Ramos Maita",
-      "Vinicius Taiky Miura de Oliveira"
+      "Vinicius Taiky Miura de Oliveira",
+      "Enzo Borgo"
     ]
   },
   {
@@ -115,7 +119,8 @@ window.CATEGORIAS = [
       "Gabriela Mendes Nobrega",
       "Heloísa Leão Silva",
       "Sophia Valquiria Ramos Maita",
-      "Vinicius Taiky Miura de Oliveira"
+      "Vinicius Taiky Miura de Oliveira",
+      "Enzo Borgo"
     ]
   }
 ];
