@@ -86,8 +86,60 @@
     try { localStorage.setItem(chave(slug), JSON.stringify(arr)); } catch (e) { /* modo privado */ }
   }
 
+  /* ---------------------------------------------------------
+     Lista de nomes — dados.js traz a lista padrão e o navegador
+     guarda a lista editada em lote na página da categoria
+     --------------------------------------------------------- */
+  function chaveNomes(slug) { return 'sorteio-osec:nomes:' + slug; }
+
+  /* tira marcadores, espaços sobrando, linhas vazias e repetidos */
+  function normalizarLista(itens) {
+    var vistos = Object.create(null), saida = [];
+    itens.forEach(function (item) {
+      if (typeof item !== 'string') return;
+      var n = item.replace(/^\s*(?:[-*\u2022]|\d+\s*[.)])\s*/, '').replace(/\s+/g, ' ').trim();
+      if (!n) return;
+      var k = n.toLowerCase();
+      if (vistos[k]) return;
+      vistos[k] = 1;
+      saida.push(n);
+    });
+    return saida;
+  }
+
+  /* texto colado -> lista de nomes (um por linha; aceita ; e , como separador) */
+  function listaDoTexto(txt) {
+    var partes = String(txt).split(/[\r\n;]+/);
+    var cheias = partes.filter(function (p) { return p.trim(); });
+    if (cheias.length < 2) partes = String(txt).split(/[;,\r\n]+/);
+    return normalizarLista(partes);
+  }
+
+  function lerNomesSalvos(slug) {
+    try {
+      var v = JSON.parse(localStorage.getItem(chaveNomes(slug)));
+      if (!Array.isArray(v)) return null;
+      var limpos = normalizarLista(v);
+      return limpos.length ? limpos : null;
+    } catch (e) { return null; }
+  }
+
+  function nomesDe(cat) { return lerNomesSalvos(cat.slug) || cat.nomes.slice(); }
+
+  function listaEditada(slug) { return lerNomesSalvos(slug) !== null; }
+
+  function gravarNomes(slug, arr) {
+    try { localStorage.setItem(chaveNomes(slug), JSON.stringify(arr)); } catch (e) { /* modo privado */ }
+  }
+
+  function restaurarNomes(slug) {
+    try { localStorage.removeItem(chaveNomes(slug)); } catch (e) {}
+  }
+
   window.SorteioStore = {
     ler: lerGanhadores,
+    nomes: nomesDe,
+    editada: listaEditada,
     limparTudo: function () {
       (window.CATEGORIAS || []).forEach(function (c) {
         try { localStorage.removeItem(chave(c.slug)); } catch (e) {}
@@ -117,21 +169,32 @@
     var chk      = $('#excluir');
     var aviso    = $('#aviso');
 
+    var nomes = nomesDe(cat);
     var ganhadores = lerGanhadores(slug);
     var girando = false;
 
     /* ---- pool disponível ---- */
     function disponiveis() {
-      if (!chk.checked) return cat.nomes.slice();
-      return cat.nomes.filter(function (n) { return ganhadores.indexOf(n) === -1; });
+      if (!chk.checked) return nomes.slice();
+      return nomes.filter(function (n) { return ganhadores.indexOf(n) === -1; });
     }
 
     /* ---- listas ---- */
     function renderListas() {
-      var restantes = cat.nomes.filter(function (n) { return ganhadores.indexOf(n) === -1; }).length;
-      contaP.textContent = restantes + ' de ' + cat.nomes.length;
+      var restantes = nomes.filter(function (n) { return ganhadores.indexOf(n) === -1; }).length;
+      contaP.textContent = restantes + ' de ' + nomes.length;
+      document.querySelectorAll('[data-conta-participantes]').forEach(function (el) {
+        el.textContent = nomes.length;
+      });
+      avisoEditada.hidden = !listaEditada(slug);
       ulPart.innerHTML = '';
-      cat.nomes.forEach(function (nome, i) {
+      if (!nomes.length) {
+        var semNomes = document.createElement('li');
+        semNomes.className = 'vazio';
+        semNomes.textContent = 'Nenhum participante na lista. Use "Editar lista" para colar os nomes.';
+        ulPart.appendChild(semNomes);
+      }
+      nomes.forEach(function (nome, i) {
         var saiu = ganhadores.indexOf(nome) !== -1;
         var li = document.createElement('li');
         if (saiu) li.className = 'ja-saiu';
@@ -150,9 +213,11 @@
         ulGanha.appendChild(vazio);
       } else {
         ganhadores.forEach(function (nome, i) {
+          var fora = nomes.indexOf(nome) === -1;
           var li = document.createElement('li');
-          li.className = 'ganhador-item';
-          li.innerHTML = '<span class="pos">' + (i + 1) + '</span><span class="nome-txt"></span>';
+          li.className = 'ganhador-item' + (fora ? ' fora' : '');
+          li.innerHTML = '<span class="pos">' + (i + 1) + '</span><span class="nome-txt"></span>' +
+                         (fora ? '<span class="tag-fora">fora da lista</span>' : '');
           li.querySelector('.nome-txt').textContent = nome;
           ulGanha.appendChild(li);
         });
@@ -164,7 +229,11 @@
     function atualizarBotao() {
       var n = disponiveis().length;
       btn.disabled = girando || n === 0;
-      if (n === 0) {
+      btnEditar.disabled = girando;
+      if (!nomes.length) {
+        btn.textContent = 'Sem participantes';
+        aviso.textContent = 'Use "Editar lista" para colar os nomes de quem vai concorrer.';
+      } else if (n === 0) {
         btn.textContent = 'Todos já foram sorteados';
         aviso.textContent = 'Desmarque "não repetir" ou limpe os resultados para sortear de novo.';
       } else {
@@ -252,7 +321,7 @@
       caixaWin.innerHTML =
         '<div class="rotulo">' + (ganhadores.length) + 'º sorteado · ' + cat.nome + '</div>' +
         '<p class="nome"></p>' +
-        '<p class="premio">Sorteado entre ' + cat.nomes.length + ' participantes · ' +
+        '<p class="premio">Sorteado entre ' + nomes.length + ' participantes · ' +
         new Date().toLocaleString('pt-BR') + '</p>';
       caixaWin.querySelector('.nome').textContent = nome;
     }
@@ -303,7 +372,9 @@
       if (!pool.length) return;
 
       girando = true;
+      if (editando) fecharEditor();
       btn.disabled = true; btnLimpa.disabled = true; chk.disabled = true;
+      btnEditar.disabled = true;
       esconderVencedor();
       contexto();                                   // destrava o áudio no clique do usuário
 
@@ -322,6 +393,117 @@
         caixaWin.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
     }
+
+    /* ---------------------------------------------------------
+       Edição em lote: a caixa vira um campo de texto com um nome
+       por linha — dá para selecionar tudo e colar a lista nova
+       --------------------------------------------------------- */
+    var painelPart = ulPart.parentNode;
+
+    var btnEditar = document.createElement('button');
+    btnEditar.type = 'button';
+    btnEditar.className = 'btn fantasma mini';
+    btnEditar.textContent = 'Editar lista';
+    (painelPart.querySelector('h2') || painelPart).appendChild(btnEditar);
+
+    var avisoEditada = document.createElement('p');
+    avisoEditada.className = 'editor-nota';
+    avisoEditada.hidden = true;
+    avisoEditada.innerHTML = 'Lista editada neste navegador. ' +
+      '<button type="button" class="link-restaurar">Restaurar original</button>';
+    painelPart.insertBefore(avisoEditada, ulPart);
+
+    var editor = document.createElement('div');
+    editor.className = 'editor-nomes';
+    editor.hidden = true;
+    editor.innerHTML =
+      '<textarea spellcheck="false" aria-label="Participantes, um nome por linha"></textarea>' +
+      '<p class="editor-dica">Um nome por linha. Para trocar todo mundo: ' +
+      '<kbd>Ctrl</kbd>+<kbd>A</kbd> e cole a lista nova. ' +
+      'Linhas vazias e nomes repetidos são descartados.</p>' +
+      '<div class="editor-acoes">' +
+        '<button type="button" class="btn fantasma mini principal" data-acao="salvar">Salvar lista</button>' +
+        '<button type="button" class="btn fantasma mini" data-acao="cancelar">Cancelar</button>' +
+        '<button type="button" class="btn fantasma mini" data-acao="restaurar">Restaurar original</button>' +
+      '</div>';
+    painelPart.appendChild(editor);
+
+    var area = editor.querySelector('textarea');
+    var btnRestaurar = editor.querySelector('[data-acao="restaurar"]');
+    var editando = false;
+
+    function abrirEditor() {
+      editando = true;
+      area.value = nomes.join('\n');
+      ulPart.hidden = true;
+      editor.hidden = false;
+      btnEditar.textContent = 'Fechar edição';
+      btnRestaurar.hidden = !listaEditada(slug);
+      area.focus();
+      area.select();                 // já vem tudo selecionado: é só colar por cima
+      area.scrollTop = 0;
+    }
+
+    function fecharEditor() {
+      editando = false;
+      editor.hidden = true;
+      ulPart.hidden = false;
+      btnEditar.textContent = 'Editar lista';
+    }
+
+    function aplicarNomes(novos) {
+      nomes = novos;
+      esconderVencedor();
+      renderListas();
+      faixaInicial();
+    }
+
+    function salvarEditor() {
+      if (girando) return;
+      var novos = listaDoTexto(area.value);
+      if (!novos.length) {
+        alert('A lista ficou vazia — escreva ou cole ao menos um nome.');
+        area.focus();
+        return;
+      }
+      gravarNomes(slug, novos);
+      aplicarNomes(novos);
+      fecharEditor();
+    }
+
+    function voltarAoOriginal() {
+      if (girando) return;
+      if (!confirm('Voltar para a lista original de "' + cat.nome + '"?')) return;
+      restaurarNomes(slug);
+      aplicarNomes(cat.nomes.slice());
+      if (editando) {
+        area.value = nomes.join('\n');
+        btnRestaurar.hidden = true;
+        area.focus();
+        area.select();
+        area.scrollTop = 0;
+      }
+    }
+
+    btnEditar.addEventListener('click', function () {
+      if (editando) fecharEditor(); else abrirEditor();
+    });
+
+    editor.addEventListener('click', function (e) {
+      var acao = e.target.getAttribute && e.target.getAttribute('data-acao');
+      if (acao === 'salvar') salvarEditor();
+      else if (acao === 'cancelar') fecharEditor();
+      else if (acao === 'restaurar') voltarAoOriginal();
+    });
+
+    avisoEditada.querySelector('.link-restaurar').addEventListener('click', voltarAoOriginal);
+
+    area.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.stopPropagation(); fecharEditor(); btnEditar.focus(); }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.code === 'Enter')) {
+        e.preventDefault(); salvarEditor();
+      }
+    });
 
     /* ---- eventos ---- */
     btn.addEventListener('click', sortear);
@@ -361,7 +543,8 @@
     /* ---- estado inicial ---- */
     function faixaInicial() {
       var pool = disponiveis();
-      if (!pool.length) pool = cat.nomes;
+      if (!pool.length) pool = nomes;
+      if (!pool.length) pool = ['—'];
       var base = embaralhar(pool);
       while (base.length < 3) base = base.concat(base);
       var frag = document.createDocumentFragment();
@@ -386,10 +569,22 @@
   /* ---------------------------------------------------------
      Página inicial — status de cada categoria
      --------------------------------------------------------- */
+  function preencher(seletor, valor) {
+    document.querySelectorAll(seletor).forEach(function (el) { el.textContent = valor; });
+  }
+
   window.montarHome = function () {
     var grade = $('#cartoes');
     if (!grade) return;
     grade.innerHTML = '';
+
+    var pessoas = Object.create(null), inscricoes = 0;
+    (window.CATEGORIAS || []).forEach(function (c) {
+      nomesDe(c).forEach(function (n) { pessoas[n.toLowerCase()] = 1; inscricoes++; });
+    });
+    preencher('[data-total-categorias]', (window.CATEGORIAS || []).length);
+    preencher('[data-total-pessoas]', Object.keys(pessoas).length);
+    preencher('[data-total-inscricoes]', inscricoes);
 
     (window.CATEGORIAS || []).forEach(function (c) {
       var g = lerGanhadores(c.slug);
@@ -400,7 +595,7 @@
       a.innerHTML =
         '<span class="ico">' + c.icone + '</span>' +
         '<h3></h3>' +
-        '<p class="meta">' + c.nomes.length + ' participantes' +
+        '<p class="meta">' + nomesDe(c).length + ' participantes' +
         (c.premios.length ? ' · ' + c.premios.length + (c.premios.length === 1 ? ' prêmio' : ' prêmios') : '') +
         '</p>' +
         '<span class="selo' + (g.length ? '' : ' neutro') + '">' +

@@ -235,3 +235,44 @@ kbd{
 @media (prefers-reduced-motion:reduce){
   .vencedor{ animation-duration:.01ms; }
 }
+
+/* ---------- edição da lista de participantes ---------- */
+.btn.mini{
+  font-size:11px; font-weight:700; letter-spacing:.04em;
+  padding:6px 12px; border-radius:9px; text-transform:none;
+}
+.painel h2 .btn.mini{ flex:0 0 auto; }
+.btn.mini.principal{
+  color:#0a0a0a; border-color:transparent; font-weight:800;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 85%, #fff), var(--accent));
+}
+.btn.mini.principal:hover:not(:disabled){ color:#0a0a0a; border-color:transparent; }
+
+.editor-nomes textarea{
+  display:block; width:100%; min-height:330px; resize:vertical;
+  font:inherit; font-size:14.5px; line-height:1.6; color:var(--txt);
+  background:#0a0e18; border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+}
+.editor-nomes textarea:focus{
+  outline:none;
+  border-color:color-mix(in srgb, var(--accent) 60%, var(--line));
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.editor-dica{ margin:10px 0 0; color:var(--dim); font-size:12.5px; line-height:1.7; }
+.editor-acoes{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+
+.editor-nota{ margin:-2px 0 10px; color:var(--dim); font-size:12px; line-height:1.5; }
+.link-restaurar{
+  appearance:none; border:0; background:none; padding:0; cursor:pointer;
+  font:inherit; font-size:12px; font-weight:700; color:var(--accent);
+  text-decoration:underline; text-underline-offset:2px;
+}
+
+.ganhador-item.fora .nome-txt{ color:var(--dim); }
+.tag-fora{
+  margin-left:auto; flex:0 0 auto; font-size:10px; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
+  border:1px solid var(--line); border-radius:999px; padding:2px 8px;
+}
+.painel h2{ flex-wrap:wrap; row-gap:6px; }
+.painel h2 .conta{ white-space:nowrap; }
